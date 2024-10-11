@@ -32,7 +32,7 @@ static DEFINE_SPINLOCK(phys_addr_lock);
 static phys_addr_t translate_linear_address(struct mm_struct *mm, uintptr_t va)
 {
 	pgd_t *pgd;
-#ifdef __PAGETABLE_P4D_FOLDED
+#if defined(__PAGETABLE_P4D_FOLDED) || (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0))
 	p4d_t *p4d;
 #endif
 	pmd_t *pmd;
@@ -46,14 +46,14 @@ static phys_addr_t translate_linear_address(struct mm_struct *mm, uintptr_t va)
 	if (pgd_none(*pgd) || pgd_bad(*pgd)) {
 		return 0;
 	}
-#ifdef __PAGETABLE_P4D_FOLDED
+#if defined(__PAGETABLE_P4D_FOLDED) || (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0))
 	p4d = p4d_offset(pgd, va);
 	if (p4d_none(*p4d) || p4d_bad(*p4d)) {
 		return 0;
 	}
 	pud = pud_offset(p4d, va);
 #else
-    pud = pud_offset(pgd, va);
+        pud = pud_offset(pgd, va);
 #endif
 	if (pud_none(*pud) || pud_bad(*pud)) {
 		return 0;
